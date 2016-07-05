@@ -1,0 +1,214 @@
+<?php
+class ClsEgresado
+{
+
+function egresados_por_cargo($cargo){
+         $conexion = new Clsconexion_bd();
+         $conectar = $conexion->conex_intranet();
+	 $sql = "SELECT cedula,nombres,apellidos,nomina,fecha_ing,fecha_egr
+		FROM tablasmaestras.maestra 
+		WHERE tablasmaestras.maestra.cod_cargo='$cargo'
+		
+		UNION ALL
+		
+		SELECT cedula,nombres,apellidos,nomina,fec_ing_obr,fec_egr_obr
+		FROM tablasobrero.maestra 
+		WHERE tablasobrero.maestra.cod_cargo='$cargo'";
+	$consulta = $conectar->query($sql);	
+	while($row= $consulta->fetch()){
+                $cedula= $row['cedula'];
+		$nombre=trim($row['apellidos'])." ".trim($row['nombres']);
+		$cedula= $row['cedula'];
+		$nomina= $row['nomina'];
+		$ig= new ClsEgresado();
+		$desc_nomina= $ig->cambiar_nomina($nomina);
+		$fecha1=$row['fecha_ing'];
+		$fecha_ingreso=date("d-m-Y",strtotime($fecha1));
+		$fecha2=$row['fecha_egr'];
+		$fecha_egreso=date("d-m-Y",strtotime($fecha2));
+	$tabla.='<tr>';
+	$tabla.='<td class="td">'.$cedula.'</td>';
+	$tabla.='<td class="td1">'.$nombre.'</td>';
+	$tabla.='<td class="td">'.strtoupper($desc_nomina).'</td>';
+	$tabla.='<td class="td">'.$fecha_ingreso.'</td>';
+	$tabla.='<td class="td">'.$fecha_egreso.'</td>';
+	$tabla.='</tr>';
+	}
+return $tabla;
+}
+
+function data_egresado($cedula){
+	$conexion = new Clsconexion_bd();
+	$conectar = $conexion->conex_intranet();
+	$sql="SELECT nombres,apellidos,estado,sexo,nomina,cod_condicion,fecha_ing,fecha_egr,cod_cargo FROM tablasmaestras.maestra WHERE tablasmaestras.maestra.cedula=$cedula UNION ALL SELECT nombres,apellidos,cast (status as char),sexo,nomina,condicion,fec_ing_obr,fec_egr_obr,cod_cargo FROM tablasobrero.maestra WHERE tablasobrero.maestra.cedula=$cedula";
+	$consulta = $conectar->query($sql);
+	if($consulta){
+	 	$row= $consulta->fetch();
+		$nombre=trim($row['apellidos'])." ".trim($row['nombres']);
+		if($row['sexo']==M or $row['sexo']==1){
+		$sexo='MASCULINO';
+		}
+		else
+		{$sexo='FEMENINO';}
+		$nomina= $row['nomina'];
+		$fecha1=$row['fecha_ing'];
+		$fecha_ingreso=date("d-m-Y",strtotime($fecha1));
+		$fecha2=$row['fecha_egr'];
+		if(empty($fecha2)){
+		$fecha_egreso='NO POSEE';
+		}else{
+		$fecha_egreso=date("d-m-Y",strtotime($fecha2));
+		}
+		$cod_condicion= $row['cod_condicion'];
+		$cod_cargo= $row['cod_cargo'];
+		$status= $row['estado'];
+	}
+return array ($nombre,$sexo,$nomina,$fecha_ingreso,$fecha_egreso,$cod_condicion,$cod_cargo,$status,$cedula);
+}
+
+function data_egresado_letra($nombre){
+	$conexion = new Clsconexion_bd();
+	$conectar = $conexion->conex_intranet();
+	$sql="select cedula,nombres,apellidos,estado,sexo,nomina,cod_condicion,fecha_ing,fecha_egr,cod_cargo from tablasmaestras.maestra where (trim(nombres) || ' ' || trim(apellidos)) ='$nombre'
+UNION ALL
+select cedula,nombres,apellidos,cast (status as char),sexo,nomina,condicion,fec_ing_obr,fec_egr_obr,cod_cargo from tablasobrero.maestra where (trim(nombres) || ' ' || trim(apellidos)) ='$nombre'";
+	$consulta = $conectar->query($sql);
+	if($consulta){
+	 	$row= $consulta->fetch();
+		$nombre=trim($row['apellidos'])." ".trim($row['nombres']);
+		if($row['sexo']==M or $row['sexo']==1){
+		$sexo='MASCULINO';
+		}
+		else
+		{$sexo='FEMENINO';}
+		$nomina= $row['nomina'];
+		$fecha1=$row['fecha_ing'];
+		$fecha_ingreso=date("d-m-Y",strtotime($fecha1));
+		$fecha2=$row['fecha_egr'];
+		if(empty($fecha2)){
+		$fecha_egreso='NO POSEE';
+		}else{
+		$fecha_egreso=date("d-m-Y",strtotime($fecha2));
+		}
+		$cod_condicion= $row['cod_condicion'];
+		$cod_cargo= $row['cod_cargo'];
+		$status= $row['estado'];
+		$cedula= $row['cedula'];
+	}
+return array ($nombre,$sexo,$nomina,$fecha_ingreso,$fecha_egreso,$cod_condicion,$cod_cargo,$status,$cedula);
+}
+
+function cambiar_nomina($nomina){
+	$conexion = new Clsconexion_bd();
+	$conectar = $conexion->conex_intranet();
+	$sql = "select descripcion from tablasmaestras.tipo_nomina where tablasmaestras.tipo_nomina.codigo='$nomina'";
+	$consulta = $conectar->query($sql);
+	if (($consulta) and ($row= $consulta->fetch())){
+		$nomina_descrip=$row['descripcion'];			
+	}
+return $nomina_descrip;
+}
+
+function cambiar_motivo($egreso){
+	$conexion = new Clsconexion_bd();
+	$conectar = $conexion->conex_rrhh();
+	$sql = "select descripcion from tablasmaestras.motivo_egreso where codigo='$egreso'";
+	$consulta = $conectar->query($sql);
+	if (($consulta) and ($row= $consulta->fetch())){
+		$motivo_descrip=$row['descripcion'];			
+	}
+return $motivo_descrip;
+}
+
+function tipo_contratacion($cod_contrat){
+		$conexion = new Clsconexion_bd();
+		$conectar = $conexion->conex_intranet();
+		$sql = "SELECT descripcion FROM recibopago.condicion WHERE recibopago.condicion.cod_condicion=$cod_contrat";
+		$consulta = $conectar->query($sql);
+		if (($consulta) and ($row= $consulta->fetch())){
+			$cod_contrat=$row['descripcion'];			
+		}
+return $cod_contrat;
+}
+
+function descrip_status($cod_contrat){
+		$conexion = new Clsconexion_bd();
+		$conectar = $conexion->conex_intranet();
+		$sql = "SELECT descripcion FROM recibopago.condicion WHERE recibopago.condicion.cod_condicion=$cod_contrat";
+		$consulta = $conectar->query($sql);
+		if (($consulta) and ($row= $consulta->fetch())){
+			$cod_contrat=$row['descripcion'];			
+		}
+return $cod_contrat;
+}
+
+
+function buscar_cargo($cod_cargo){
+		$conexion = new Clsconexion_bd();
+		$conectar = $conexion->conex_intranet();
+		$sql = "SELECT descripcion FROM tablasmaestras.cargos WHERE tablasmaestras.cargos.codigo='$cod_cargo' UNION ALL SELECT descripcion FROM tablasobrero.cargos WHERE tablasobrero.cargos.codigo='$cod_cargo'";
+		$consulta = $conectar->query($sql);
+		if (($consulta) and ($row= $consulta->fetch())){
+			$cod_cargo=$row['descripcion'];
+		}
+
+return $cod_cargo;
+}
+
+function buscar_cod_cargo($descrip){
+		$conexion = new Clsconexion_bd();
+		$conectar = $conexion->conex_intranet();
+		$sql = "SELECT codigo FROM tablasmaestras.cargos WHERE tablasmaestras.cargos.descripcion like '%%$descrip%%'UNION ALL 
+SELECT codigo FROM tablasobrero.cargos WHERE UPPER (tablasobrero.cargos.descripcion) like'%%$descrip%%'";
+		$consulta = $conectar->query($sql);
+		if (($consulta) and ($row= $consulta->fetch())){
+			$codigo=$row['codigo'];
+		}
+
+return $codigo;
+}
+
+function existe_egresado($cedula){
+	$existe=false;
+	$conexion = new Clsconexion_bd();
+	$conectar = $conexion->conex_intranet();
+	$sql="select * from personal_egresado.egresado where personal_egresado.egresado.cedula =$cedula";
+	$consulta = $conectar->query($sql);
+	if($consulta){
+	 	$row= $consulta->fetch();
+		if($row[cedula]>0)
+			$existe=true;
+	}
+return $existe;
+}
+
+function esta_editado($cedula){
+	$editado=false;
+	$conexion = new Clsconexion_bd();
+	$conectar = $conexion->conex_intranet();
+	$sql="select editado from personal_egresado.egresado where personal_egresado.egresado.cedula =$cedula";
+	$consulta = $conectar->query($sql);
+	if($consulta){
+	 	$row= $consulta->fetch();
+		if($row['editado']==1){
+			$editado=true;}
+	}
+return $editado;
+}
+
+function data_editado($cedula){
+	$conexion = new Clsconexion_bd();
+	$conectar = $conexion->conex_intranet();
+	$sql="select ult_cargo, fecha_egreso, estado from personal_egresado.egresado where personal_egresado.egresado.cedula =$cedula";
+	$consulta = $conectar->query($sql);
+	if($consulta){
+	 	$row= $consulta->fetch();
+		$cargo= $row['ult_cargo'];	
+		$fecha= $row['fecha_egreso'];
+		$estado= $row['estado'];
+			
+	}
+return array ($cargo,$fecha,$estado);
+}
+}
+?>

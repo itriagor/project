@@ -1,0 +1,127 @@
+<?php
+header('Content-Type: text/html; charset=UTF-8');
+ include('/WEB_APP_PHP/xajax/xajax.php');
+ include('../../clases/clssolicitudes.php');
+ include('../../control_paginas/control_agregar_sol.php'); // Aquí es donde esta la función xajax
+ $xajax->printJavascript("http://$_SERVER[SERVER_NAME]/xajax");
+
+?>
+<link href="../../css/sitdoc.css" rel="stylesheet" type="text/css">
+<script src="../../js/jquery-1.3.2.min.js" type="text/javascript"></script>
+<script>
+$(document).ready(function(){
+   
+  $("#boton").click(function() {
+  $("#div").toggle('slow', function() {
+    // Animation complete.
+  });
+}); 
+
+});
+</script>
+<script>
+$(document).ready(function(){
+   
+  $("#boton2").click(function() {
+  $("#div").toggle('slow', function() {
+    // Animation complete.
+  });
+}); 
+
+});
+</script>
+<script>
+function validar_texto(e){
+    tecla = (document.all) ? e.keyCode : e.which;
+
+    //Tecla de retroceso para borrar, siempre la permite
+    if (tecla==8){
+        return true;
+    }
+        
+    // Patron de entrada, en este caso solo acepta numeros
+    patron =/[0-9]/;
+    
+    tecla_final = String.fromCharCode(tecla);
+    
+    return patron.test(tecla_final);
+}
+</script>  
+<script>
+function sf(ID){
+document.getElementById(ID).focus();
+}
+</script>
+
+<body onload="sf('cedula');">
+<form name="Form" method="post" action="" id="Form"> 
+<fieldset width="750">
+
+
+	<legend><strong><h5>Buscar Egresado</h5></strong></legend>			
+	Ingrese Cédula:<br>
+	<TABLE   border="1" align="center">
+	<input  class="campo" maxlength="10"  name="cedula" type="text" id="cedula"  size="14" onkeypress="return validar_texto(event)" onkeyup = "if(event.keyCode == 13) xajax_buscar_egresado(document.Form.cedula.value);" tabindex>
+	<img src="../../imagenes/lupa.png" width="28" height="26" border="0" alt="Buscar"  onclick="xajax_buscar_egresado(document.Form.cedula.value);">
+<tr align="center"><TD colspan="4">
+<label>DATOS DEL EXPEDIENTE</label>
+</TD></tr>	
+		<th>Nombre</th> 
+		<th>Sexo</th>
+		<th>Nomina</th> 
+		<th>Tipo de Contratacion</th>
+<tr>	
+		<td><input readonly="true" class="campo3" name="nombres_t" type="text" id="nombres_t" value="" size="20"></td>
+		<td><input readonly="true" class="campo3" name="sexo" type="text" id="sexo" value="" size="14"></td>
+		<td><input readonly="true" class="campo3" name="nomina" type="text" id="nomina" value="" size="14"></td>
+		<td><input readonly="true" class="campo3" name="condicion" type="text" id="condicion" value="" size="22"></td>
+
+</tr>
+</TD>
+</tr>
+
+		<th>Fecha de Ingreso</th> 
+		<th>Fecha de Egreso</th>
+		<th>Ultimo Cargo</th>
+		<th>Estado</th>
+<tr>	
+		
+		<td><input readonly="true" class="campo3" name="fecha_ing" type="text" id="fecha_ing" value="" size="10"></td>
+		<td><input readonly="true" class="campo3" name="fecha_egr" type="text" id="fecha_egr" value="" size="14"></td>
+		<td><input readonly="true" class="campo3" name="cargo" type="text" id="cargo" value="" size="22"></td>
+		<td><input readonly="true" class="campo3" name="cargo" type="text" id="estado" value="" size="22"></td>
+</tr>
+</TD>
+</tr>
+</TABLE>
+<table align="center"><TR><TD>
+<input  class="boton" align="top" name="boton1" type="button" id="boton1" value="Nueva Búsqueda" onclick="xajax_blanquear();">
+<input class="boton" type="Button" id="boton" value="Editar">
+</TD></TR></table>
+<br><br><br>
+<div id="div" style="display: none">
+<table align="center" border="1">
+<tr align="center"><TD colspan="4">
+<label>DATOS  A EDITAR DEL EXPEDIENTE</label>
+</TD></tr>
+	<th>Fecha Egreso</th>	
+	<th>Cargo</th>		
+	<th>Profesión</th>
+	<th>Estado</th> 
+<TR>
+<TD><input type="text" id="fecha_edit" value=""></input></TD>
+<TD><input type="text" id="cargo_edit" value="" ></input></TD>
+<TD><input type="text" id="profesion_edit" value="" ></input></TD>
+<TD><input type="text" id="estado_edit" value="" ></input></TD>
+</TR>
+<table align="center"><TR><TD>
+<input type="Button" id="boton2" value="Guardar" tabindex class="boton" onclick="xajax_editar_egresado(document.Form.fecha_edit.value,document.Form.cargo_edit.value,document.Form.profesion_edit.value,document.Form.estado_edit.value,document.Form.cedula.value);">
+<input class="boton" type="Button" id="boton" value="Restaurar" onclick="xajax_restaurar_egresado(document.Form.cedula.value);">
+</TD></TR></table>
+</table>
+</div>	
+
+
+	
+</form>
+</fieldset>

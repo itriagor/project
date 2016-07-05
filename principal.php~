@@ -1,0 +1,67 @@
+<?php
+session_start();
+if (isset ($_SESSION['nivel'])){
+    if($_SESSION['nivel']== "1" and $_SESSION['status']== "1" ){
+        
+    }
+header('Content-Type: text/html; charset=UTF-8');
+include('../disenio/encabezado.php');
+  if($_SESSION['nivel']== "1" and $_SESSION['status']== "1" ){
+    include('../disenio/menu_usuario.php');    
+    }else{
+include('../disenio/menu_usuario2.php');}
+?>
+<head>
+<link href="../../css/sitdoc.css" rel="stylesheet" type="text/css">
+<link href="../../jquery/sitdoc.css" rel="stylesheet" type="text/css">
+<script language="javascript" src="../../jquery/jquery-1.7.1.min.js"></script>
+<script language="javascript" src="../../jquery/jquery.autocomplete.js"></script>
+<script language="javascript" src="../../jquery/jquery.autocomplete.css"></script>
+<script>
+var j = jQuery.noConflict()
+j(document).ready(function(){
+   
+  j("#img1").click(function() {
+  j("#imgx1").fadeToggle('slow', function() {
+    // Animation complete.
+  });
+}); 
+
+});
+</script>
+<script>
+var j = jQuery.noConflict()
+j(document).ready(function(){
+   
+  j("#imgx1").click(function() {
+  j("#img1").toggle('slow', function() {
+    // Animation complete.
+  });
+}); 
+
+});
+</script>
+</head>
+<fieldset class="fieldset">
+	<legend><strong><h3>¡Bienvenidos!</h3></strong></legend>
+        
+        <table border="0" width="100%">
+		<table width="100%" border="0">
+		<TR>
+			<TD align="left" width="50%" id="img1">
+				<img class="boton" src="../../imagenes/folder.jpg" width="60" height="75"><BR><BR><BR>
+				<!--<img src="../../imagenes/menu3.jpg" width="180" height="54"><BR><BR><BR>
+				<img src="../../imagenes/menu4.jpg" width="180" height="54">-->
+			</TD>
+		<TD id="imgx1" style="display: none;" align="center" width="50%"><img src="../../imagenes/div.jpg" width="472" height="184">
+		</TD>
+			<TD align="right" width="80%"><img src="../../imagenes/carpetas.jpg" width="400" height="240">
+		</TD>
+		</TR>
+		</table>
+</fieldset>
+<?php
+}else{
+    header("location: ../paginas/inicio/index.php");
+    }
+?>

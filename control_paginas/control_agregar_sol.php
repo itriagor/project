@@ -1,0 +1,181 @@
+<?php 
+
+function buscarnomina($cod_nomina)
+{
+	if ($cod_nomina){
+   	$conexion = new Clsconexion_bd();
+	$conectar = $conexion->conex_intranet();     
+	$sql = "select descripcion from tablasmaestras.tipo_nomina where codigo=$cod_nomina";
+	$consulta = $conectar->query($sql);
+		if ( $consulta)
+		{		
+			while ($row= $consulta->fetch()){
+			$nombre=$row['descripcion'];			
+			}
+		}
+	}
+return $nombre;
+}
+
+function editar_egresado($fecha,$cargo,$profesion,$estado,$cedula)
+{
+	$objeto = new xajaxResponse();
+   	$conexion = new Clsconexion_bd();
+	$conectar = $conexion->conex_intranet();
+	//formato fecha americana
+	$fecha1=$fecha;
+	$fecha2=date("Y-m-d",strtotime($fecha1));
+	//El nuevo valor de la variable: $fecha2="20-10-2008"
+	$sql = "update personal_egresado.egresado set fecha_egreso ='$fecha2', ult_cargo ='$cargo', profesion ='$profesion',estado='$estado', editado ='1' where 
+	cedula = $cedula";
+	$consulta = $conectar->query($sql);
+	if($consulta){
+		usleep(1000000);
+		$objeto->addAlert('Registro actualizado satisfactoriamente');
+	}else{
+		usleep(1000000);
+		$objeto->addAlert('Error al actualizar, revise los datos ingresados');
+		}
+return $objeto;
+}
+
+function restaurar_egresado($cedula)
+{
+	$objeto = new xajaxResponse();
+   	$conexion = new Clsconexion_bd();
+	$conectar = $conexion->conex_intranet();
+	$sql = "update personal_egresado.egresado set  editado ='0' where 
+	cedula = $cedula";
+	$consulta = $conectar->query($sql);
+	if($consulta){	
+		$objeto->addAlert('Registro restaurado satisfactoriamente');
+	}else{
+		$objeto->addAlert('Error al restaurar');
+		}
+return $objeto;
+}
+
+function buscar_egresado($cedula){
+	$egr= new Clssolicitudes();
+	$buscar_nomina= $egr->existe_egresado($cedula);
+	if(!$cedula)
+	{
+		$objeto = new xajaxResponse();
+		$objeto->addAlert('Ingrese cédula');
+	}else{
+		if($buscar_nomina){
+	$objeto = new xajaxResponse();
+   	$conexion = new Clsconexion_bd();
+	$conectar = $conexion->conex_intranet();
+	$sql = "SELECT nombres,apellidos,Cast(estado as INT),sexo,nomina,cod_condicion,fecha_ing,fecha_egr,cod_cargo FROM tablasmaestras.maestra WHERE tablasmaestras.maestra.cedula=$cedula UNION ALL SELECT nombres,apellidos,status,sexo,nomina,condicion,fec_ing_obr,fec_egr_obr,cod_cargo FROM tablasobrero.maestra WHERE tablasobrero.maestra.cedula=$cedula";
+	$consulta = $conectar->query($sql);
+      	if ($consulta)
+      	{
+        	while ($row= $consulta->fetch()){
+			blanquear();
+			$nombre=trim($row['apellidos'])." ".trim($row['nombres']);
+			$objeto->addAssign('nombres_t',"value",$nombre);
+				if($row['sexo']==M or $row['sexo']==1){
+				$sexo='MASCULINO';
+				$objeto->addAssign('sexo',"value",$sexo);
+				}
+				else{
+				$sexo='FEMENINO';
+				$objeto->addAssign('sexo',"value",$sexo);
+				}
+			
+			$descrip_nomina= $row['nomina'];
+			$i= new Clssolicitudes();
+			$buscar_nomina= $i->cambiar_nomina($descrip_nomina);
+			$objeto->addAssign('nomina',"value",trim(strtoupper($buscar_nomina)));
+			//formato fecha americana
+			$fecha1=$row['fecha_ing'];
+			$fecha2=date("d-m-Y",strtotime($fecha1));
+			//El nuevo valor de la variable: $fecha2="20-10-2008"	
+			$objeto->addAssign('fecha_ing',"value",trim($fecha2));
+			
+			$cod_condicion= $row['cod_condicion'];
+			$con= new Clssolicitudes();	
+			$contratacion= $con->tipo_contratacion($cod_condicion);
+			$objeto->addAssign('condicion',"value",trim(strtoupper($contratacion)));	
+			
+
+			$eg= new Clssolicitudes();
+			$edicion= $eg->esta_editado($cedula);
+			if($edicion){
+			$er= new Clssolicitudes();
+			$datos= $er->data_editado($cedula);
+			$objeto->addAssign('cargo',"value",trim(strtoupper($datos[0])));
+			$objeto->addAssign('cargo_edit',"value",trim(strtoupper($datos[0])));
+			//formato fecha americana
+			$fecha1=$row['fecha_egr'];
+			$fecha2=date("d-m-Y",strtotime($fecha1));
+			//El nuevo valor de la variable: $fecha2="20-10-2008"
+			$fecha3= $fecha2; 
+			$objeto->addAssign('fecha_egr',"value",trim(strtoupper($fecha2)));
+			$objeto->addAssign('fecha_edit',"value",trim(strtoupper($fecha3)));
+			$objeto->addAssign('estado',"value",trim(strtoupper($datos[2])));
+			$objeto->addAssign('estado_edit',"value",trim(strtoupper($datos[2])));
+			}else{
+				$cod_cargo= $row['cod_cargo'];
+				$car= new Clssolicitudes();	
+				$cargo= $car->buscar_cargo($cod_cargo);
+				$cargo2= $cargo;
+				$objeto->addAssign('cargo',"value",trim(strtoupper($cargo)));
+				$objeto->addAssign('cargo_edit',"value",trim(strtoupper($cargo2)));
+				//formato fecha americana
+				$fecha1=$row['fecha_egr'];
+				$fecha2=date("d-m-Y",strtotime($fecha1));
+				//El nuevo valor de la variable: $fecha2="20-10-2008"
+				$fecha3= $fecha2; 				
+				$objeto->addAssign('fecha_egr',"value",$fecha1);
+				$objeto->addAssign('fecha_edit',"value",trim(strtoupper($fecha3)));
+							
+				$status= $row['estado'];
+				$et= new Clssolicitudes();				
+				$estado= $et->cambiar_motivo($status);
+				$objeto->addAssign('estado',"value",trim(strtoupper($estado)));
+				$objeto->addAssign('estado_edit',"value",trim(strtoupper($estado)));
+				}
+		}
+		
+	}
+	}else{
+		$objeto = new xajaxResponse();
+		$objeto->addAlert('El expediente no se encuentra en Archivo Central');
+	}	
+	}
+
+	
+return $objeto; 
+}
+
+
+function blanquear(){
+$objeto = new xajaxResponse();
+$objeto->addAssign("nombres_t","value",'');
+$objeto->addAssign("sexo","value",'');
+$objeto->addAssign("nomina","value",'');
+$objeto->addAssign("condicion","value",'');
+$objeto->addAssign("fecha_ing","value",'');
+$objeto->addAssign("fecha_egr","value",'');
+$objeto->addAssign("cargo","value",'');
+$objeto->addAssign("cedula","value",'');
+$objeto->addAssign("fecha_edit","value",'');
+$objeto->addAssign("cargo_edit","value",'');
+$objeto->addAssign("profesion_edit","value",'');
+$objeto->addAssign("estado","value",'');
+$objeto->addAssign("estado_edit","value",'');
+
+return $objeto;
+}
+
+$xajax = new xajax();
+$xajax->registerFunction("buscar_egresado");
+$xajax->registerFunction("blanquear");
+$xajax->registerFunction("editar_egresado");
+$xajax->registerFunction("restaurar_egresado");
+$xajax->processRequests();
+?>
+
+

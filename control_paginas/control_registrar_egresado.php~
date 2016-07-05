@@ -1,0 +1,397 @@
+<?php
+function restaurar_egresado($cedula){
+   	$egre= new ClsEgresado();
+	$datos_egresado= $egre->buscar_egresado($cedula);
+        $existe_maestra= $egre->existe_maestra($cedula);
+       if(empty($cedula)){
+          $objeto = new xajaxResponse();	
+          $objeto->addAlert('Ingrese ćedula');  
+       }else{
+        if($existe_maestra){
+           if($datos_egresado){
+                $objeto = new xajaxResponse();		
+                $nombre=$datos_egresado[0];
+                $sexo=$datos_egresado[1];
+                $nomina= $datos_egresado[2];
+                $fecha_ingreso=$datos_egresado[3];
+                $fecha_egreso=$datos_egresado[4];
+                $condicion=$datos_egresado[5];
+                $cargo=$datos_egresado[6];
+                $status=$datos_egresado[7];
+                $cedula_t=$datos_egresado[8];
+                $profesion=$datos_egresado[9];
+        
+                $objeto->addAssign('cedula_t_edit',"value",$cedula_t);
+			$objeto->addAssign('nombres_t_edit',"value",trim(strtoupper(($nombre))));
+                        if($sexo==M or $sexo==1){
+                        $sexo='MASCULINO';
+                        }
+                        else{
+                             if($sexo==F or $sexo==2){
+                        $sexo='FEMENINO';
+                        }else{
+                          $sexo='';  
+                        }}
+			$objeto->addAssign('sexo_edit',"value",$sexo);
+                        
+                        $egre= new ClsEgresado();
+                        $nomina_desc= $egre->cambiar_nomina($nomina);
+			$objeto->addAssign('nomina_edit',"value",trim(strtoupper(($nomina_desc))));
+                        
+			$objeto->addAssign('fecha_ing_edit',"value",$fecha_ingreso); 
+                        
+                        $egrea= new ClsEgresado();
+                        $condicion2= $egrea->tipo_contratacion($condicion);
+			$objeto->addAssign('condicion_edit',"value",trim(strtoupper(($condicion2))));
+                        
+                        $egr= new ClsEgresado();
+                        $cargo2= $egr->buscar_cargo($cargo);
+			$objeto->addAssign('cargo_edit',"value",  trim(strtoupper(($cargo2))));
+                        
+			$objeto->addAssign('fecha_egr_edit',"value",$fecha_egreso);
+                        
+                        $egrex= new ClsEgresado();
+                        $status2= $egrex->cambiar_motivo($status);
+			$objeto->addAssign('estado_edit',"value",trim(strtoupper($status2)));
+                        $objeto->addAssign('profesion_edit',"value",'');
+                       
+		}
+       }else{
+          $objeto = new xajaxResponse();	
+          $objeto->addAlert('Cédula no existe en la base de datos de recursos humanos'); 
+       }   
+       }
+       
+	
+return $objeto;
+}
+
+function editar_egresado($campo,$cedula_t,$nombre,$sexo,$nomina,$condicion,$profesion,$fecha_ing,$fecha_egr,$cargo,$estado,$obs)
+{
+	$objeto = new xajaxResponse();
+        $egre= new ClsEgresado();
+        if(is_numeric($campo)){
+	$datos_egresado= $egre->data_egresado($campo);
+        $cedula=$datos_egresado[8];
+//        $objeto->addAlert($campo.' '.$cedula.'numero');
+        }
+        else{
+            $datos_egresado= $egre->data_egresado_letra($campo);
+            $cedula=$datos_egresado[8];
+//            $objeto->addAlert($campo.' '.$cedula.'letra');
+        }
+   	$conexion = new Clsconexion_bd();
+	$conectar = $conexion->conex_intranet();
+
+                if(empty($fecha_egr)){    
+             $fecha_egreso='null';                
+        }else{
+             $fecha2=$fecha_egr;
+             $fecha_egreso=date("Y-m-d",strtotime($fecha2)); 
+             $fecha_egreso="'".$fecha_egreso."'";
+            }
+            
+        if(empty($fecha_ing)){    
+             $fecha_ingreso='null';                
+        }else{
+             $fecha1=$fecha_ing;
+             $fecha_ingreso=date("Y-m-d",strtotime($fecha1)); 
+             $fecha_ingreso="'".$fecha_ingreso."'";
+            }
+            
+                $sql = "update personal_egresado.egresado 
+set cedula='$cedula_t',ult_cargo='$cargo',fecha_egreso=$fecha_egreso,profesion='$profesion',estado='$estado',nombres_apellidos='$nombre',
+tipo_contratacion='$condicion',sexo='$sexo',nomina='$nomina',fecha_ingreso=$fecha_ingreso,obs='$obs'
+where cedula = $cedula";
+//                $objeto->addAssign('msg',"innerHTML",$sql);
+
+	$consulta = $conectar->query($sql);
+	if($consulta){
+		usleep(1000000);
+		$objeto->addAlert('Registro actualizado satisfactoriamente');
+	}else{
+		usleep(1000000);
+		$objeto->addAlert('Error al actualizar el expediente');
+		}
+return $objeto;
+}
+
+
+function guardar_egresado($cedula,$nombre,$sexo,$nomina,$condicion,$profesion,$fecha_ing,$fecha_egr,$cargo,$estado,$obs){
+        $nombre=trim(mb_strtoupper($nombre,'utf-8')); 
+        $sexo=strtoupper($sexo);
+        $nomina=strtoupper($nomina);
+        $condicion=strtoupper($condicion);
+        $profesion=strtoupper($profesion);        
+        $cargo=strtoupper($cargo);
+        $estado=strtoupper($estado);
+        $profesion1=strtoupper($profesion);
+        $estado1= strtoupper($estado);
+        $conexion = new Clsconexion_bd();
+	$conectar = $conexion->conex_intranet();
+        
+        if( (empty($nombre)) or (empty($sexo)) or (strlen($fecha_egr)<10 and strlen($fecha_egr)>5 ) or (strlen($fecha_ing)<10 and strlen($fecha_ing)>5) ){
+            $objeto = new xajaxResponse();
+           
+            if(empty($nombre)){
+              $objeto->addAlert('Indique el nombre del egresado');  
+           }
+            
+           if(empty($sexo)){
+             $objeto->addAlert('Identifique el sexo del egresado');  
+           }
+           
+            if(strlen($fecha_ing)<10){
+                $objeto->addAlert('Ingrese fecha de ingreso en el formato indicado "DD/MM/AAAA"');  
+            }
+            if(strlen($fecha_egr)<10){
+                $objeto->addAlert('Ingrese fecha de egreso en el formato indicado "DD/MM/AAAA"');  
+            }
+           
+        }else{
+              if(empty($fecha_egr)){    
+             $fecha_egreso='null';                
+        }else{
+             $fecha2=$fecha_egr;
+             $fecha_egreso=date("Y-m-d",strtotime($fecha2)); 
+             $fecha_egreso="'".$fecha_egreso."'";
+            }
+            
+        if(empty($fecha_ing)){    
+             $fecha_ingreso='null';                
+        }else{
+             $fecha1=$fecha_ing;
+             $fecha_ingreso=date("Y-m-d",strtotime($fecha1)); 
+             $fecha_ingreso="'".$fecha_ingreso."'";
+            }
+             
+            $sql="insert into personal_egresado.egresado (cedula,ult_cargo,fecha_egreso,profesion,estado,nombres_apellidos,sexo,nomina,fecha_ingreso,tipo_contratacion,obs)
+            values ($cedula,'$cargo',$fecha_egreso,'$profesion1','$estado1','$nombre','$sexo','$nomina',$fecha_ingreso,'$condicion','$obs')";
+                       
+        $consulta = $conectar->query($sql);
+        if($consulta){
+             $objeto = new xajaxResponse();
+             $objeto->addAlert('Registro Exitoso');
+        }else{
+             $objeto = new xajaxResponse();
+             $objeto->addAlert('Falla en el registro'); 
+        }
+        }
+            
+      
+            
+return $objeto;       
+}
+function buscar_egresado($cedula){
+	$egr= new ClsEgresado();
+	$existe= $egr->existe_egresado($cedula);
+	if(!$cedula)
+	{
+		$objeto = new xajaxResponse();
+		$objeto->addAlert('Ingrese cédula');
+	}else{
+         if ($existe){
+             $objeto = new xajaxResponse();
+		//$objeto->addAlert('Expediente ya registrado');
+        $egre= new ClsEgresado();
+        if(is_numeric($cedula)){
+	$datos_egresado= $egre->data_egresado($cedula);}
+        else{
+            $datos_egresado= $egre->data_egresado_letra($cedula);
+        }
+        $nombre=$datos_egresado[0];
+	$sexo=$datos_egresado[1];
+	$nomina= $datos_egresado[2];
+	$fecha_ingreso=$datos_egresado[3];
+	$fecha_egreso=$datos_egresado[4];
+	$condicion=$datos_egresado[5];
+	$cargo=$datos_egresado[6];
+	$status=$datos_egresado[7];
+	$cedula_t=$datos_egresado[8];
+        $profesion=$datos_egresado[9];
+         $obs=$datos_egresado[10];
+			$objeto->addAssign('cedula_t',"value",$cedula_t);
+			$objeto->addAssign('nombres_t',"value",trim(mb_strtoupper($nombre,'utf-8')));                 
+			$objeto->addAssign('sexo',"value",$sexo);
+			$objeto->addAssign('nomina',"value",trim(strtoupper(($nomina))));                        
+			$objeto->addAssign('fecha_ing',"value",$fecha_ingreso);                        
+			$objeto->addAssign('condicion',"value",trim(strtoupper(($condicion))));
+			$objeto->addAssign('cargo',"value",  trim(strtoupper(($cargo))));                        
+			$objeto->addAssign('fecha_egr',"value",$fecha_egreso);
+			$objeto->addAssign('estado',"value",trim(strtoupper($status)));
+                        $objeto->addAssign('profesion',"value",trim(strtoupper($profesion)));
+                         $objeto->addAssign('obs',"value",trim(strtoupper($obs)));	
+                       $boton.= '<td>';
+                       $boton.='<input  class="boton" align="top" name="boton" type="button" id="boton" value="Guardar" onclick="xajax_editar_egresado
+                       (document.Form.cedula.value,document.Form.cedula_t.value,document.Form.nombres_t.value,document.Form.sexo.value,document.Form.nomina.value,document.Form.condicion.value,
+                       document.Form.profesion.value,document.Form.fecha_ing.value,document.Form.fecha_egr.value,document.Form.cargo.value,document.Form.estado.value,document.Form.obs.value);"/>';
+                       $boton.='</td>';                      
+                       $per='PERSONA YA REGISTRADA';
+                       $objeto->addAssign('msg',"innerHTML",$per);
+                       $objeto->addAssign('botones',"innerHTML",$boton);
+                         
+                         $egresad= new ClsEgresado();
+                         $partes=explode(", ", $cedula);
+                         $nombre=$partes[1];
+                         $apellido=$partes[0];
+                         $nombreapellido=$nombre.' '.$apellido;
+                         $existe_m= $egresad->existe_maestra($nombreapellido);
+                         if($existe_m){
+                           $boton1.='<td>';
+                           $boton1.='<input class="boton" type="Button" id="boton" value="Obtener" onclick="xajax_restaurar_egresado(document.Form.cedula_t.value);"/>';
+                           $boton1.='</td>'; 
+                          }
+                       
+                       $objeto->addAssign('botones1',"innerHTML",$boton1);
+                       
+                       $objeto->addAssign('guardar',"innerHTML",'');
+                   
+         }else{
+             $egresax= new ClsEgresado();
+             $partes=explode(", ", $cedula);
+                         $nombre=$partes[1];
+                         $apellido=$partes[0];
+                         $nombreapellido=$nombre.' '.$apellido;
+             $existe_maestra= $egresax->existe_maestra($nombreapellido);
+                     if(!$existe_maestra){
+                         $objeto = new xajaxResponse();
+//                         $partes=explode(", ", $cedula);
+//                         $nombre=$partes[1];
+//                         $apellido=$partes[0];
+//                         $nombreapellido=$nombre.' '.$apellido;
+                         $objeto->addAlert('No se encontraron datos, complete los datos de manera manual');
+//                         $sql="select cedula 
+//              from tablasmaestras.maestra 
+//              where (trim(nombres) || ' ' || trim(apellidos)) ='$nombreapellido'
+//              UNION ALL
+//              select cedula 
+//              from tablasobrero.maestra 
+//              where (trim(nombres) || ' ' || trim(apellidos)) ='$nombreapellido'"; 
+//                          $objeto->addAssign('msg',"innerHTML",$sql);
+                         if( is_numeric($cedula)){
+                             $objeto->addAssign('cedula_t',"value",$cedula);
+                }
+                else{
+                            $objeto->addAssign('nombres_t',"value",$cedula);
+                }
+                     }else{
+	if( is_numeric($cedula)){
+	$objeto = new xajaxResponse();
+   	$egre= new ClsEgresado();
+	$datos_egresado= $egre->buscar_egresado($cedula);
+	}
+	else{
+	$objeto = new xajaxResponse();
+   	$egre= new ClsEgresado();
+	$datos_egresado= $egre->data_egresado_letra1($nombreapellido);
+	}
+      	if ($datos_egresado)
+      	{
+	$nombre=$datos_egresado[0];
+	$sexo=$datos_egresado[1];
+	$nomina= $datos_egresado[2];
+	$fecha_ingreso=$datos_egresado[3];
+	$fecha_egreso=$datos_egresado[4];
+	$condicion=$datos_egresado[5];
+	$cargo=$datos_egresado[6];
+	$status=$datos_egresado[7];
+	$cedula_t=$datos_egresado[8];
+        
+			 $objeto->addAssign('cedula_t_edit',"value",$cedula_t);
+                          $objeto->addAssign('cedula_t',"value",$cedula_t);
+			$objeto->addAssign('nombres_t_edit',"value",trim(strtoupper(($nombre))));
+                        $objeto->addAssign('nombres_t',"value",trim(strtoupper(($nombre))));
+                        if($sexo==M or $sexo==1){
+                        $sexo='MASCULINO';
+                        }
+                        else{
+                             if($sexo==F or $sexo==2){
+                        $sexo='FEMENINO';
+                        }else{
+                          $sexo='';  
+                        }}
+			$objeto->addAssign('sexo_edit',"value",$sexo);
+                        $objeto->addAssign('sexo',"value",$sexo);
+                        
+                        $egre= new ClsEgresado();
+                        $nomina_desc= $egre->cambiar_nomina($nomina);
+			$objeto->addAssign('nomina_edit',"value",trim(strtoupper(($nomina_desc))));
+                        
+			$objeto->addAssign('fecha_ing_edit',"value",$fecha_ingreso); 
+                        
+                        $egrea= new ClsEgresado();
+                        $condicion2= $egrea->tipo_contratacion($condicion);
+			$objeto->addAssign('condicion_edit',"value",trim(strtoupper(($condicion2))));
+                        
+                        $egr= new ClsEgresado();
+                        $cargo2= $egr->buscar_cargo($cargo);
+			$objeto->addAssign('cargo_edit',"value",  trim(strtoupper(($cargo2))));
+                        
+			$objeto->addAssign('fecha_egr_edit',"value",$fecha_egreso);
+                        
+                        $egrex= new ClsEgresado();
+                        $status2= $egrex->cambiar_motivo($status);
+			$objeto->addAssign('estado_edit',"value",trim(strtoupper($status2)));
+                        $objeto->addAssign('profesion_edit',"value",'');		
+	}
+	else{
+		$objeto = new xajaxResponse();
+		$objeto->addAlert('revise data ingresada');
+	}}}	
+	}
+
+	
+return $objeto; 
+}
+
+
+function blanquear($cedula){
+$objeto = new xajaxResponse();
+$objeto->addAssign("cedula_t","value",'');
+$objeto->addAssign("cedula_2","value",$cedula);
+$objeto->addAssign("nombres_t","value",'');
+$objeto->addAssign("sexo","value",'');
+$objeto->addAssign("nomina","value",'');
+$objeto->addAssign("condicion","value",'');
+$objeto->addAssign("fecha_ing","value",'');
+$objeto->addAssign("fecha_egr","value",'');
+$objeto->addAssign("cargo","value",'');
+$objeto->addAssign("cedula","value",'');
+$objeto->addAssign("estado","value",'');
+$objeto->addAssign("profesion","value",'');
+$objeto->addAssign("obs","value",'');
+$objeto->addAssign('msg',"innerHTML",'');
+$objeto->addAssign('boton',"innerHTML",'');
+$boton.= '<td>';
+$boton.='<input  class="boton" align="top" name="boton" type="button" id="boton" value="Guardar" onclick="xajax_guardar_egresado
+(document.Form.cedula_t.value,document.Form.nombres_t.value,document.Form.sexo.value,document.Form.nomina.value,document.Form.condicion.value,
+document.Form.profesion.value,document.Form.fecha_ing.value,document.Form.fecha_egr.value,document.Form.cargo.value,document.Form.estado.value);"/>';
+$boton.='</td>';
+$objeto->addAssign('guardar',"innerHTML",$boton);
+$objeto->addAssign('botones',"innerHTML",'');
+$objeto->addAssign("cedula_t_edit","value",'');
+$objeto->addAssign('nombres_t_edit',"value",'');
+$objeto->addAssign('sexo_edit',"value",'');
+$objeto->addAssign('nomina_edit',"value",'');
+$objeto->addAssign('fecha_ing_edit',"value",'');
+$objeto->addAssign('condicion_edit',"value",'');
+$objeto->addAssign('cargo_edit',"value",'');
+$objeto->addAssign('fecha_egr_edit',"value",'');
+$objeto->addAssign('estado_edit',"value",'');
+$objeto->addAssign('profesion_edit',"value",'');
+$objeto->addAssign('botones1',"innerHTML",'');
+                   
+
+return $objeto;
+}
+
+$xajax = new xajax();
+$xajax->registerFunction("restaurar_egresado");
+$xajax->registerFunction("editar_egresado");
+$xajax->registerFunction("buscar_egresado");
+$xajax->registerFunction("blanquear");
+$xajax->registerFunction("guardar_egresado");
+$xajax->processRequests();
+?>
+
+

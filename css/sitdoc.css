@@ -1,0 +1,158 @@
+.tcuadroformulario {
+        margin-top: 10px;
+        margin-bottom: 10px;
+	width: 600px;
+	background-color: #B0C4DE;
+	border: 1px solid #a4a4a4;
+	-moz-border-radius: 9px 9px 9px 9px;
+        
+}
+.eticampofor { font-family:arial,verdana;font-size:9pt;font-weight:bold;color:#400080;margin-left:15px;}
+.campodesc { font-family:arial,verdana;font-size:9pt;width:480px;z-index:1;color:#000000;}
+.titulox { 
+    font-family:arial,verdana;
+    font-size:15pt;
+    font-weight:bold;
+    text-align: center;
+}
+
+th{
+background-color:#487CFF;
+font-size:small;
+color: white;
+}
+.campo4 { width: 200px; font-size:small; border:1px solid #FF0000;}
+.campo { width: 175px; font-size:small; border:1px solid #FF0000;}
+.campo3{ width: 200px; font-size:small; text-align:center; border:1px; }
+.campo33{ width: 200px; font-size:small; text-align:center; color:#000000; background-color: #F2F2F2; }
+.campo34{ width: 20px; background-color: #F2F2F2; }
+.campo2 { width: 100px; font-size:small; border:1px solid #FF0000;}
+fieldset{
+ margin-top:10px;
+border-radius: 15px;
+-moz-border-radius: 15px;
+-webkit-border-radius: 15px;
+border: 3px solid #cc6666;
+background-color: #d8dae2;
+}
+.fieldset{
+border-radius: 15px;
+-moz-border-radius: 15px;
+-webkit-border-radius: 15px;
+border: 3px solid #cc6666;
+background-color: white;
+}
+.boton{
+cursor:pointer;
+border:1px solid #F2F2F2;
+}
+.boton:hover{
+    border:1px solid #c88d1d;
+    background-color: #eaeff8;
+}
+.textformtitulo{
+	color: #0A37FF;
+	font-size: 12px;
+	font-weight:bold;
+}
+.titulo{
+text-align:center;
+}
+body{
+   background:#F2F2F2;
+   color:#084B8A;
+   font-size:16px;
+   font-family:Arial;
+ 
+}
+.tabla1{
+margin-top:10px;
+}
+.td{
+width: 170px;
+font-size:small; 
+text-align:center;
+margin-top:5px;
+margin-bottom:5px;
+color: black;
+}
+.td1{
+width: 270px;
+font-size:small; 
+text-align:left;
+margin-top:5px;
+margin-bottom:5px;
+color: black;
+}
+.tede{
+    border:0px;
+}
+
+.label{
+background-color:#487CFF;
+font-size:medium;
+color: white;
+}
+.label2{
+background-color:#487CFF;
+font-size:large;
+color: white;
+border-left-color:1px solid #ffffff;
+border-right-color:1px solid #ffffff;
+
+}
+.margen{
+    margin-bottom: 15px;
+}
+<-------------------------------------------->
+              
+.ac_results {
+	padding: 0px;
+	border: 1px solid #d13836;
+	background-color: #ffffff;
+	overflow: hidden;
+	z-index: 99999;
+}
+
+.ac_results ul {
+	width: 100%;
+	list-style-position: outside;
+	list-style: none;
+	padding: 0px;
+	margin: 0px;
+}
+
+.ac_results li {
+	margin: 0px;
+	padding: 2px 5px;
+	cursor: default;
+	display: block;
+	/* 
+	if width will be 100% horizontal scrollbar will apear 
+	when scroll mode will be used
+	*/
+	/*width: 100%;*/
+	font: menu ;
+	font-size: 14px;
+	/* 
+	it is very important, if line-height not setted or setted 
+	in relative units scroll will be broken in firefox
+	*/
+	line-height: 16px;
+	overflow: hidden;
+}
+
+.ac_loading {
+	background: #000000 url('css/ima/indicator.gif') right center no-repeat;
+}
+
+.ac_odd {
+	background-color: #ffffff;
+}
+
+.ac_over {
+	background-color: #6699ff;
+	color: #FFFFFF;
+}
+
+        
